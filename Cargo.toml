@@ -1,0 +1,10 @@
+[package]
+name = "git_multi_glance"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+clap = { version = "4.6.6", features = ["derive"] }
+owo-colors = "4.3.0"
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "process", "macros", "sync"] }
