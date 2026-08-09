@@ -1,5 +1,9 @@
 # git_multi_glance
 
+[![CI](https://github.com/celeo/git_multi_glance/actions/workflows/ci.yml/badge.svg)](https://github.com/celeo/git_multi_glance/actions/workflows/ci.yml)
+[![Rust](https://img.shields.io/badge/language-Rust-orange.svg)](https://www.rust-lang.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+
 A small CLI that scans the immediate subdirectories of a path (default: current
 directory) and prints, for each one that's a git or [jj](https://github.com/jj-vcs/jj)
 repo, its branch, dirty status, and whether it's ahead/behind/diverged from its remote —
