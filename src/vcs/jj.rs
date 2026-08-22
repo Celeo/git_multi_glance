@@ -6,24 +6,45 @@ use tokio::process::Command as AsyncCommand;
 
 use super::{LocalStatus, RemoteState};
 
-pub fn local_status(path: &Path) -> anyhow::Result<LocalStatus> {
-    let branch_output = Command::new("jj")
-        .args(["log", "-r", "@", "--no-graph", "-T", "bookmarks"])
+fn run_log(path: &Path, revset: &str, template: &str) -> anyhow::Result<String> {
+    let output = Command::new("jj")
+        .args(["log", "-r", revset, "--no-graph", "-T", template])
         .current_dir(path)
         .output()
         .context("failed to run jj log")?;
-    if !branch_output.status.success() {
+    if !output.status.success() {
         return Err(anyhow!(
             "jj log failed: {}",
-            String::from_utf8_lossy(&branch_output.stderr)
+            String::from_utf8_lossy(&output.stderr)
         ));
     }
-    let mut branch = String::from_utf8_lossy(&branch_output.stdout)
-        .trim()
-        .to_string();
-    if branch.is_empty() {
-        branch = "(no bookmark)".to_string();
+    Ok(String::from_utf8_lossy(&output.stdout).into_owned())
+}
+
+/// The bookmark associated with `@`, or (if `@` is a bare empty commit with no bookmark
+/// of its own, as jj leaves after `jj new`/checking out a bookmark) the bookmark on `@-`
+/// instead — that's the commit the user actually thinks of themselves as "on".
+fn current_bookmark(path: &Path) -> anyhow::Result<String> {
+    let head = run_log(path, "@", "bookmarks ++ \"\\n\" ++ empty")?;
+    let mut lines = head.lines();
+    let head_bookmarks = lines.next().unwrap_or("").trim();
+    let head_empty = lines.next().unwrap_or("").trim() == "true";
+
+    if !head_bookmarks.is_empty() {
+        return Ok(head_bookmarks.to_string());
     }
+    if head_empty {
+        let parent_bookmarks = run_log(path, "@-", "bookmarks")?;
+        let parent_bookmarks = parent_bookmarks.trim();
+        if !parent_bookmarks.is_empty() {
+            return Ok(parent_bookmarks.to_string());
+        }
+    }
+    Ok("(no bookmark)".to_string())
+}
+
+pub fn local_status(path: &Path) -> anyhow::Result<LocalStatus> {
+    let branch = current_bookmark(path)?;
 
     let status_output = Command::new("jj")
         .args(["status"])
