@@ -1,10 +1,7 @@
-use std::path::Path;
-use std::process::Command;
-
-use anyhow::{Context, anyhow};
-use tokio::process::Command as AsyncCommand;
-
 use super::{LocalStatus, RemoteState};
+use anyhow::{Context, anyhow};
+use std::{path::Path, process::Command};
+use tokio::process::Command as AsyncCommand;
 
 struct PorcelainBranch {
     head: String,

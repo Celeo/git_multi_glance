@@ -1,10 +1,7 @@
-use std::path::Path;
-use std::process::Command;
-
-use anyhow::{Context, anyhow};
-use tokio::process::Command as AsyncCommand;
-
 use super::{LocalStatus, RemoteState};
+use anyhow::{Context, anyhow};
+use std::{path::Path, process::Command};
+use tokio::process::Command as AsyncCommand;
 
 fn run_log(path: &Path, revset: &str, template: &str) -> anyhow::Result<String> {
     let output = Command::new("jj")
@@ -103,7 +100,14 @@ pub async fn remote_status(path: &Path) -> anyhow::Result<RemoteState> {
 
     let count = |revset: String| -> anyhow::Result<u32> {
         let output = Command::new("jj")
-            .args(["log", "--no-graph", "-T", "commit_id ++ \"\\n\"", "-r", &revset])
+            .args([
+                "log",
+                "--no-graph",
+                "-T",
+                "commit_id ++ \"\\n\"",
+                "-r",
+                &revset,
+            ])
             .current_dir(path)
             .output()
             .context("failed to run jj log")?;

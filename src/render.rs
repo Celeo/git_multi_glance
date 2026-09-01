@@ -1,9 +1,9 @@
-use std::io::Write;
-
+use crate::{
+    repo::{Repo, RepoKind},
+    vcs::{LocalStatus, RemoteState},
+};
 use owo_colors::OwoColorize;
-
-use crate::repo::{Repo, RepoKind};
-use crate::vcs::{LocalStatus, RemoteState};
+use std::io::Write;
 
 pub struct Renderer {
     total_rows: usize,
@@ -24,7 +24,11 @@ impl Renderer {
 
     /// Print the next row. Pass `checking = false` when no remote check will ever run.
     pub fn print_row(&mut self, repo: &Repo, local: &LocalStatus, checking: bool) {
-        let remote = if checking { RemoteLabel::Checking } else { RemoteLabel::Skipped };
+        let remote = if checking {
+            RemoteLabel::Checking
+        } else {
+            RemoteLabel::Skipped
+        };
         println!("{}", self.format_line(repo, local, remote));
         self.total_rows += 1;
     }

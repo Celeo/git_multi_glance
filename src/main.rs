@@ -2,16 +2,28 @@
 
 #![deny(unsafe_code, clippy::all)]
 
-mod cli;
 mod render;
 mod repo;
 mod vcs;
 
 use clap::Parser;
-use cli::Args;
 use render::Renderer;
+use std::path::PathBuf;
 use tokio::sync::mpsc;
 use vcs::{LocalStatus, RemoteState};
+
+/// Print git/jj status for every immediate subdirectory of a path.
+#[derive(Parser, Debug)]
+#[command(version, about)]
+pub struct Args {
+    /// Directory whose immediate children should be scanned (defaults to cwd)
+    #[arg(long)]
+    pub path: Option<PathBuf>,
+
+    /// Skip network checks against remotes (local branch/dirty status only)
+    #[arg(long)]
+    pub no_remote: bool,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
